@@ -1,0 +1,12 @@
+#!/bin/sh /etc/rc.common
+
+START=17
+
+start() {
+  OLDMAC=$(uci get network.wan.macaddr)
+  logger "[WAN-MAC] Old WAN MAC address is ${OLDMAC}."
+  NEWMAC=$(printf "%02x" $(( $(hexdump -n1 -e'/1 "0x%02x"' /dev/urandom) & ~1 | 2)) && hexdump -n5 -e'/1 ":%02x"' /dev/urandom)
+  logger "[WAN-MAC] Applying new random MAC address to WAN (${NEWMAC})..."
+  uci set network.@device[0].macaddr=${NEWMAC}
+  uci commit network
+}
